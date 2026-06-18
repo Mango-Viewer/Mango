@@ -84,6 +84,12 @@ export const createPanelController = ({
     }
   };
 
+  const hasOpenLeftPanel = (): boolean =>
+    leftPanelOrder.some((panel) => {
+      const store = leftPanelStores[panel];
+      return store ? get(store) : false;
+    });
+
   const resolveActiveLeftPanel = (
     preferred?: ViewerPanel | null,
     useFallback = true,
@@ -174,7 +180,7 @@ export const createPanelController = ({
         derivedStores.contentsAvailable,
       ],
       () => {
-        enforceSingleLeftPanel(lastOpenedLeftPanel, false);
+        enforceSingleLeftPanel(hasOpenLeftPanel() ? lastOpenedLeftPanel : null, false);
       },
     );
     unsubscribers.push(leftPanelGuard.subscribe(() => undefined));

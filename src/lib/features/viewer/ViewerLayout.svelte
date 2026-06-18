@@ -65,6 +65,11 @@
     { id: 'highlights', name: 'Highlights', color: '#34d399', visible: true },
     { id: 'mine', name: 'My Annotations', color: '#a78bfa', visible: true },
   ];
+  const MOBILE_LAYOUT_WIDTH = 768;
+
+  const matchesInitialMobileLayout = (): boolean =>
+    typeof window !== 'undefined' &&
+    window.matchMedia(`(max-width: ${MOBILE_LAYOUT_WIDTH}px)`).matches;
 
   const styleForLayerColor = (color: string): string => {
     const r = parseInt(color.slice(1, 3), 16) || 0;
@@ -98,6 +103,7 @@
     story = undefined,
     storyUrl = undefined,
   }: Props = $props();
+  const initialMobileLayout = matchesInitialMobileLayout();
 
   const corePlugins = [createAnnotationFocusPlugin()];
 
@@ -205,6 +211,7 @@
   } = viewerState;
   const viewportState = new ViewportState();
   setContext(VIEWPORT_STATE_CONTEXT_KEY, viewportState);
+  let isMobileLayout = $state(initialMobileLayout);
 
   let stageRef: ReturnType<typeof Stage> | null = $state(null);
   let canZoom = $state(false);
@@ -237,6 +244,19 @@
   let isMainViewerMode = $derived(!isStoryViewer && !isStoryBuilder);
   let viewerSettingsLayout = $state<'1x1' | '1x2' | '2x1' | '2x2'>('1x1');
   let workspace = $state<WorkspaceStore | null>(null);
+  const closeLeftPanelStores = () => {
+    viewerState.showContents.set(false);
+    viewerState.showAnnotations.set(false);
+    viewerState.showTools.set(false);
+    viewerState.showSettings.set(false);
+    viewerState.showSearch.set(false);
+    viewerState.showMetadata.set(false);
+    viewerState.showLayers.set(false);
+  };
+
+  if (initialMobileLayout) {
+    closeLeftPanelStores();
+  }
 
   let viewerSettingsTheme = $state<'dark' | 'light'>('dark');
   let viewerSettingsLocale = $state('en');
@@ -262,6 +282,7 @@
   let storyIsLoading = $state(false);
   let storyPlayState: 'idle' | 'playing' | 'paused' = $state('idle');
   let viewerRoot: HTMLDivElement | null = $state(null);
+  let isViewerFullscreen = $state(false);
   let storyChapterThumbnails: Array<string | null> = $state([]);
   const storyThumbnailCache = new Map<string, string>();
   let storyChapterDurationSec = $state(0);
@@ -426,7 +447,7 @@
   };
   const handleStoryFullscreen = async () => {
     if (typeof document === 'undefined') return;
-    if (!document.fullscreenElement) {
+    if (!isViewerFullscreenActive()) {
       await viewerRoot?.requestFullscreen?.();
       return;
     }
@@ -440,27 +461,72 @@
     controller.setPanelOpen('settings', false);
     controller.setPanelOpen('search', false);
     controller.setPanelOpen('metadata', false);
+    controller.setPanelOpen('layers', false);
   };
 
-  const MOBILE_LAYOUT_WIDTH = 768;
-  let wasMobileLayout = false;
+  const isViewerFullscreenActive = () => {
+    if (!viewerRoot || typeof document === 'undefined') return false;
+    const rootNode = viewerRoot.getRootNode();
+    const shadowFullscreenElement =
+      rootNode instanceof ShadowRoot ? rootNode.fullscreenElement : null;
+    const host = getShadowHost();
+    return (
+      document.fullscreenElement === viewerRoot ||
+      document.fullscreenElement === host ||
+      shadowFullscreenElement === viewerRoot
+    );
+  };
+
+  const syncFullscreenState = () => {
+    isViewerFullscreen = isViewerFullscreenActive();
+  };
+
+  const guardFullscreenDrag = (event: TouchEvent | PointerEvent) => {
+    if (!isViewerFullscreenActive()) return;
+    if ('pointerType' in event && event.pointerType !== 'touch') return;
+    event.preventDefault();
+  };
+
+  let wasMobileLayout = initialMobileLayout;
   const syncMobileLayout = () => {
     if (!viewerRoot) return;
     const nextIsMobileLayout = viewerRoot.clientWidth <= MOBILE_LAYOUT_WIDTH;
     if (nextIsMobileLayout && !wasMobileLayout) {
-      closeMobileLeftDrawer();
+      closeLeftPanelStores();
     }
+    isMobileLayout = nextIsMobileLayout;
     wasMobileLayout = nextIsMobileLayout;
   };
 
   onMount(() => {
+    const root = viewerRoot;
     syncMobileLayout();
-    if (typeof ResizeObserver === 'undefined' || !viewerRoot) return;
-    const observer = new ResizeObserver(() => {
-      syncMobileLayout();
+    syncFullscreenState();
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+    root?.addEventListener('touchmove', guardFullscreenDrag, {
+      capture: true,
+      passive: false,
     });
-    observer.observe(viewerRoot);
-    return () => observer.disconnect();
+    root?.addEventListener('pointermove', guardFullscreenDrag, {
+      capture: true,
+    });
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && root) {
+      observer = new ResizeObserver(() => {
+        syncMobileLayout();
+      });
+      observer.observe(root);
+    }
+    return () => {
+      document.removeEventListener('fullscreenchange', syncFullscreenState);
+      root?.removeEventListener('touchmove', guardFullscreenDrag, {
+        capture: true,
+      });
+      root?.removeEventListener('pointermove', guardFullscreenDrag, {
+        capture: true,
+      });
+      observer?.disconnect();
+    };
   });
 
   let draftAnno = $state.raw<ResolvedAnnotation | null>(null);
@@ -1037,6 +1103,9 @@
         normalisedConfig.allowCreateMode || isStoryBuilder || isAnnotationEditor,
     };
     viewerState.config.set(configWithModeDefaults);
+    if (isMobileLayout) {
+      closeLeftPanelStores();
+    }
   });
   $effect.pre(() => {
     viewerState.plugins.set([...corePlugins, ...plugins]);
@@ -1178,8 +1247,8 @@
         type="button"
         class="viewer__fullscreen-btn"
         onclick={handleStoryFullscreen}
-        aria-label="Toggle fullscreen"
-        title="Toggle fullscreen"
+        aria-label={isViewerFullscreen ? 'Close fullscreen' : 'Enter fullscreen'}
+        title={isViewerFullscreen ? 'Close fullscreen' : 'Enter fullscreen'}
       >
         ⛶
       </button>
@@ -1904,6 +1973,7 @@
     display: grid;
     grid-template-rows: auto 1fr;
     gap: 16px;
+    box-sizing: border-box;
     height: 100%;
     max-height: 100vh;
     min-height: clamp(820px, 92vh, 980px);
@@ -1925,6 +1995,38 @@
     position: relative;
 
     /* Desktop default: contained with fixed height */
+  }
+
+  .viewer:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    min-height: 0;
+    border-radius: 0;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+
+  .viewer:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    min-height: 0;
+    border-radius: 0;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+
+  .viewer:fullscreen .viewer__grid {
+    max-height: 100%;
+  }
+
+  .viewer:-webkit-full-screen .viewer__grid {
+    max-height: 100%;
+  }
+
+  .viewer:fullscreen::backdrop {
+    background: #0b0f14;
   }
 
   .viewer[data-theme='light'] {
@@ -2044,6 +2146,7 @@
     display: grid;
     align-content: start;
     justify-items: center;
+    box-sizing: border-box;
     padding: 14px 8px;
     border: 1px solid var(--viewer-panel-border);
     border-right: none;
@@ -2107,6 +2210,9 @@
   .stage__bottom {
     display: grid;
     gap: 12px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
     padding: 12px;
     border-radius: 16px;
     background: var(--viewer-stage-bottom-bg, rgba(12, 16, 22, 0.72));
@@ -2120,6 +2226,16 @@
 
   .viewer__backdrop {
     display: none;
+  }
+
+  @media (max-width: 768px) {
+    .viewer {
+      min-height: 100dvh;
+      max-height: 100dvh;
+      height: 100dvh;
+      overflow: hidden;
+      padding: 16px;
+    }
   }
 
   @container mango-viewer (max-width: 768px) {
@@ -2197,31 +2313,50 @@
       grid-row: 2;
       grid-column: 1;
       width: 100%;
+      max-width: 100%;
       height: auto;
-      padding: 8px 16px;
+      box-sizing: border-box;
+      padding: 4px 6px;
       border: 1px solid var(--viewer-panel-border);
-      border-radius: 16px;
+      border-radius: 12px;
       background: var(--viewer-panel);
-      display: flex;
-      justify-content: space-around;
+      display: grid;
       align-items: center;
     }
 
     .viewer__control-rail :global(.viewer__dock) {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
       align-items: center;
       width: 100%;
-      max-width: 480px;
+      max-width: none;
       padding: 0;
-      gap: 8px;
+      gap: 3px;
     }
 
     .viewer__control-rail :global(.viewer__dock-button) {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+      width: 100%;
+      max-width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      justify-self: center;
+    }
+
+    .viewer__control-rail :global(.viewer__dock-icon),
+    .viewer__control-rail :global(.viewer__dock-icon svg) {
+      width: 18px;
+      height: 18px;
+    }
+
+    .viewer__control-rail :global(.viewer__dock-icon--info) {
+      width: 19px;
+      height: 19px;
+    }
+
+    .viewer__control-rail :global(.viewer__dock-info-chip) {
+      width: 18px;
+      height: 18px;
+      font-size: 13px;
     }
 
     .stage {

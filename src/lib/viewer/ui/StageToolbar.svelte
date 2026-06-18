@@ -185,23 +185,24 @@
       >
         <svg
           class="stage__toolbar-icon stage__toolbar-icon--rotate"
-          viewBox="-1 -1 26 26"
+          viewBox="0 0 24 24"
           aria-hidden="true"
         >
           <path
-            d="M7 6H3V2"
+            d="M21 4v6h-6"
             fill="none"
             stroke="currentColor"
-            stroke-width="1.6"
+            stroke-width="1.8"
             stroke-linecap="round"
             stroke-linejoin="round"
           />
           <path
-            d="M3 6a9 9 0 1 1 3.2 9.6"
+            d="M20.4 13.4A8.5 8.5 0 1 1 18 5.9"
             fill="none"
             stroke="currentColor"
-            stroke-width="1.6"
+            stroke-width="1.8"
             stroke-linecap="round"
+            stroke-linejoin="round"
           />
         </svg>
       </button>
@@ -372,11 +373,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     row-gap: 5px;
     gap: 5px;
     width: 100%;
     max-width: 100%;
+    box-sizing: border-box;
     margin-inline: auto;
     padding: 3px;
     border-radius: 11px;
@@ -404,6 +406,7 @@
   .stage__toolbar-group {
     display: inline-flex;
     align-items: center;
+    flex: 0 0 auto;
     max-width: 100%;
     min-width: 0;
     border: 1px solid var(--viewer-toolbar-group-border, rgba(255, 255, 255, 0.1));
@@ -423,6 +426,7 @@
   .stage__toolbar-button {
     border: 0;
     width: 36px;
+    height: 34px;
     min-height: 34px;
     padding: 0;
     display: inline-flex;
@@ -445,6 +449,7 @@
 
   .stage__toolbar-button--single {
     width: 36px;
+    height: 36px;
     border: 1px solid var(--viewer-toolbar-group-border, rgba(255, 255, 255, 0.1));
     border-radius: 10px;
     background: var(--viewer-toolbar-group-bg, rgba(20, 30, 45, 0.55));
@@ -508,17 +513,24 @@
   }
 
   .stage__toolbar-icon--rotate {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
   }
 
   @container (max-width: 430px) {
+    .stage__toolbar {
+      gap: 2px;
+      padding: 0;
+      overflow: hidden;
+    }
+
     .stage__toolbar-separator {
       display: none;
     }
 
     .stage__toolbar-group {
-      min-height: 29px;
+      min-height: 27px;
+      border-radius: 8px;
     }
 
     .stage__toolbar-group--single {
@@ -526,48 +538,52 @@
     }
 
     .stage__toolbar-button {
-      width: 30px;
-      min-height: 29px;
+      width: 23px;
+      height: 25px;
+      min-height: 25px;
     }
 
     .stage__toolbar-button--single {
-      width: 30px;
-      min-height: 29px;
+      width: 23px;
+      height: 25px;
+      min-height: 25px;
       border-radius: 8px;
     }
 
     .stage__toolbar-value {
-      min-width: 58px;
-      min-height: 29px;
-      font-size: 10px;
-      gap: 3px;
-      padding-inline: 6px;
+      min-width: 36px;
+      min-height: 25px;
+      font-size: 9px;
+      gap: 2px;
+      padding-inline: 3px;
     }
 
     .stage__toolbar-value--zoom {
-      min-width: 51px;
+      min-width: 31px;
     }
 
     .stage__toolbar-icon {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
     }
 
     .stage__toolbar-icon--rotate {
-      width: 13px;
-      height: 13px;
+      width: 14px;
+      height: 14px;
     }
   }
 
   @media (max-width: 900px) {
     .stage__toolbar {
-      gap: 5px;
-      padding: 2px;
+      gap: 2px;
+      padding: 0;
       border-radius: 8px;
+      overflow: hidden;
     }
 
     .stage__toolbar-group {
-      min-height: 29px;
+      min-height: 27px;
+      border-radius: 8px;
     }
 
     .stage__toolbar-group--single {
@@ -579,36 +595,38 @@
     }
 
     .stage__toolbar-button {
-      width: 30px;
-      min-height: 29px;
+      width: 23px;
+      height: 25px;
+      min-height: 25px;
     }
 
     .stage__toolbar-button--single {
-      width: 30px;
+      width: 23px;
+      height: 25px;
       border-radius: 8px;
-      min-height: 29px;
+      min-height: 25px;
     }
 
     .stage__toolbar-value {
-      min-width: 58px;
-      min-height: 29px;
-      font-size: 10px;
-      gap: 3px;
-      padding-inline: 6px;
+      min-width: 36px;
+      min-height: 25px;
+      font-size: 9px;
+      gap: 2px;
+      padding-inline: 3px;
     }
 
     .stage__toolbar-value--zoom {
-      min-width: 51px;
+      min-width: 31px;
     }
 
     .stage__toolbar-icon {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
     }
 
     .stage__toolbar-icon--rotate {
-      width: 13px;
-      height: 13px;
+      width: 14px;
+      height: 14px;
     }
   }
 </style>

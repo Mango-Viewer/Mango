@@ -391,7 +391,32 @@
       right: 16px;
       transform: none;
       grid-auto-flow: column;
-      grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+      gap: 4px;
+    }
+
+    .viewer__dock-button,
+    .viewer__dock--compact .viewer__dock-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+    }
+
+    .viewer__dock-icon,
+    .viewer__dock-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .viewer__dock-icon--info {
+      width: 20px;
+      height: 20px;
+    }
+
+    .viewer__dock-info-chip {
+      width: 19px;
+      height: 19px;
+      font-size: 14px;
     }
 
     .viewer__dock--compact {

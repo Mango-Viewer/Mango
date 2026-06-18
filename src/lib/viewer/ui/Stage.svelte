@@ -632,7 +632,8 @@
 
     .stage__dock :global(.viewer__dock) {
       grid-auto-flow: column;
-      grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+      gap: 4px;
     }
   }
 </style>
