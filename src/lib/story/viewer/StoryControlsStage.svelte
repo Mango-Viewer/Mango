@@ -95,6 +95,12 @@
 
 <div class="story-shell" data-testid="story-controls-stage">
   <div class="story-shell__body">
+    <section class="story-shell__stage-wrap">
+      <div class="story-shell__stage-frame">
+        <slot name="stage"></slot>
+      </div>
+    </section>
+
     <aside class="story-shell__sidebar">
       <p class="story-shell__chapter-label">
         {#if loading}
@@ -170,12 +176,6 @@
         </div>
       </div>
     </aside>
-
-    <section class="story-shell__stage-wrap">
-      <div class="story-shell__stage-frame">
-        <slot name="stage"></slot>
-      </div>
-    </section>
   </div>
 
   <footer class="story-shell__footer" data-testid="story-controls-pagination">
@@ -247,7 +247,7 @@
 
   .story-shell__body {
     display: grid;
-    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
     gap: 14px;
     min-height: 0;
     overflow: hidden;
@@ -524,8 +524,24 @@
   }
 
   @media (max-width: 1120px) {
+    .story-shell {
+      grid-template-rows: auto auto auto;
+      overflow-y: auto;
+    }
+
     .story-shell__body {
       grid-template-columns: 1fr;
+      height: max-content;
+      overflow: visible;
+    }
+
+    .story-shell__stage-wrap {
+      flex: none;
+      min-height: clamp(320px, 56dvh, 620px);
+    }
+
+    .story-shell__sidebar {
+      overflow: visible;
     }
 
     .story-shell__title {
@@ -546,6 +562,10 @@
       grid-auto-columns: 64px;
       gap: 10px;
       min-height: 98px;
+    }
+
+    .story-shell__stage-wrap {
+      min-height: clamp(300px, 58dvh, 520px);
     }
 
     .story-shell__transport {
