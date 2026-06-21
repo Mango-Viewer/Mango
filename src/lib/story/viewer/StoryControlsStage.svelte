@@ -94,14 +94,13 @@
 </script>
 
 <div class="story-shell" data-testid="story-controls-stage">
-  <header class="story-shell__topbar">
-    <nav class="story-shell__actions" aria-label="Story actions">
-      <button class="story-shell__action" type="button"> Share </button>
-      <button class="story-shell__action" type="button"> Info </button>
-    </nav>
-  </header>
-
   <div class="story-shell__body">
+    <section class="story-shell__stage-wrap">
+      <div class="story-shell__stage-frame">
+        <slot name="stage"></slot>
+      </div>
+    </section>
+
     <aside class="story-shell__sidebar">
       <p class="story-shell__chapter-label">
         {#if loading}
@@ -177,12 +176,6 @@
         </div>
       </div>
     </aside>
-
-    <section class="story-shell__stage-wrap">
-      <div class="story-shell__stage-frame">
-        <slot name="stage"></slot>
-      </div>
-    </section>
   </div>
 
   <footer class="story-shell__footer" data-testid="story-controls-pagination">
@@ -241,7 +234,7 @@
     --story-accent-2: #4bc6ff;
 
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-rows: minmax(0, 1fr) auto auto;
     gap: 14px;
     height: 100%;
     min-height: 100%;
@@ -252,33 +245,9 @@
     border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
-  .story-shell__topbar {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .story-shell__actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .story-shell__action {
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 12px;
-    background: rgba(7, 17, 32, 0.66);
-    color: var(--story-text);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 10px 14px;
-    cursor: pointer;
-  }
-
   .story-shell__body {
     display: grid;
-    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
     gap: 14px;
     min-height: 0;
     overflow: hidden;
@@ -435,7 +404,6 @@
     overflow: hidden;
   }
 
-  .story-shell__action:hover:not(:disabled),
   .story-shell__chapter:hover:not(:disabled),
   .story-shell__transport-btn:hover:not(:disabled),
   .story-shell__play-btn:hover:not(:disabled) {
@@ -443,7 +411,6 @@
   }
 
   .story-shell__chapter:disabled,
-  .story-shell__action:disabled,
   .story-shell__transport-btn:disabled,
   .story-shell__play-btn:disabled {
     opacity: 0.5;
@@ -557,8 +524,24 @@
   }
 
   @media (max-width: 1120px) {
+    .story-shell {
+      grid-template-rows: auto auto auto;
+      overflow-y: auto;
+    }
+
     .story-shell__body {
       grid-template-columns: 1fr;
+      height: max-content;
+      overflow: visible;
+    }
+
+    .story-shell__stage-wrap {
+      flex: none;
+      min-height: clamp(320px, 56dvh, 620px);
+    }
+
+    .story-shell__sidebar {
+      overflow: visible;
     }
 
     .story-shell__title {
@@ -579,6 +562,10 @@
       grid-auto-columns: 64px;
       gap: 10px;
       min-height: 98px;
+    }
+
+    .story-shell__stage-wrap {
+      min-height: clamp(300px, 58dvh, 520px);
     }
 
     .story-shell__transport {
