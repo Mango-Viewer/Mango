@@ -1,6 +1,6 @@
 {
   "name": "@mango-iiif/iiif-viewer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A Svelte-based viewer and story toolkit for IIIF resources.",
   "license": "MIT",
   "repository": {
@@ -30,6 +30,8 @@
   "main": "./src/dist/index.js",
   "module": "./src/dist/index.js",
   "types": "./src/dist/index.d.ts",
+  "unpkg": "./src/dist/mango-viewer-element.iife.js",
+  "jsdelivr": "./src/dist/mango-viewer-element.iife.js",
   "exports": {
     ".": {
       "import": "./src/dist/index.js",

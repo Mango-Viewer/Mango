@@ -7,8 +7,6 @@ import tseslint from 'typescript-eslint';
 const ignores = [
   'node_modules/**',
   '**/dist/**',
-  'demo/**',
-  'apps/demo/demo/**',
   'spec/**',
   'triiiceratops/**',
   '**/.svelte-kit/**',

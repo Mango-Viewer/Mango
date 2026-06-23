@@ -1,6 +1,4 @@
 node_modules
-/demo
-/apps/demo/demo
 **/node_modules
 **/dist
 **/.svelte-kit
