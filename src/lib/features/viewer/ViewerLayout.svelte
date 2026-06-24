@@ -749,7 +749,6 @@
         ? resolved.motivation
         : ['oa:commenting'];
 
-    console.log('[ViewerLayout] Created resolved draft:', resolved);
     draftAnno = resolved;
     controller.handleAnnotationSelect({ id: resolved.id, preventZoom: true });
   };
